@@ -12,7 +12,13 @@ Vue.use(VueRouter)
 
 import axios from 'axios'
 // 配置请求的根路径
-axios.defaults.baseURL = 'http://106.12.11.162:8888/api/private/v1/login'
+axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/'
+// 拦截器
+axios.interceptors.request.use(confige => {
+    confige.headers.Authorization = window.sessionStorage.getItem('token')
+    // 最后必须return confige
+    return confige
+})
 Vue.prototype.$http = axios
 
 const routes = [
@@ -31,7 +37,7 @@ router.beforeEach((to, from, next) => {
     // from 代表从哪个路径跳转而来
     // next 是一个函数，代表放行
     //        next () 放行      next ('/login')  强制跳转   
-    if ( to.path === '/login' ) return next();
+    if (to.path === '/login') return next();
     // 获取token
     const tokenStr = window.sessionStorage.getItem('token');
     if (!tokenStr) return next('/login');
