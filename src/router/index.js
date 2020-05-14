@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../components/Login.vue'
 import Home from '../components/Home.vue'
+import Welcome from '../components/Welcome.vue'
+import Users from '../components/User/Users.vue'
 import '../assets/css/global.css'
 import '../assets/fonts/iconfont.css'
 
@@ -21,10 +23,30 @@ axios.interceptors.request.use(confige => {
 })
 Vue.prototype.$http = axios
 
-const routes = [
-    { path: '/', redirect: '/login' },
-    { path: '/login', name: 'login', component: Login },
-    { path: '/home', name: 'home', component: Home }
+const routes = [{
+        path: '/',
+        redirect: '/login'
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: Login
+    },
+    {
+        path: '/home',
+        name: 'home',
+        redirect: '/welcome',
+        component: Home,
+        children: [{
+            path: '/welcome',
+            name: 'welcome',
+            component: Welcome,
+        }, {
+            path: '/users',
+            name: 'users',
+            component: Users,
+        }]
+    }
 ]
 
 const router = new VueRouter({
