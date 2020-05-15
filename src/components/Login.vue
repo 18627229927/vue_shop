@@ -26,24 +26,41 @@
 </template>
 
 <script>
-
 export default {
     data() {
         return {
-            // 登录表单的数据对象 
+            // 登录表单的数据对象
             loginFrom: {
-                username:'admin',
-                password:'123456'
+                username: 'admin',
+                password: '123456'
             },
             // 表单的验证规则对象
             loginFromRules: {
                 username: [
-                    { required: true, message: '请输入用户名称', trigger: 'blur' },
-                    { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+                    {
+                        required: true,
+                        message: '请输入用户名称',
+                        trigger: 'blur'
+                    },
+                    {
+                        min: 3,
+                        max: 10,
+                        message: '长度在 3 到 10 个字符',
+                        trigger: 'blur'
+                    }
                 ],
                 password: [
-                    { required: true, message: '请输入用户密码', trigger: 'blur' },
-                    { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+                    {
+                        required: true,
+                        message: '请输入用户密码',
+                        trigger: 'blur'
+                    },
+                    {
+                        min: 6,
+                        max: 15,
+                        message: '长度在 6 到 15 个字符',
+                        trigger: 'blur'
+                    }
                 ]
             }
         }
@@ -52,28 +69,31 @@ export default {
         // 重置登录表单
         resetLoginFrom() {
             // console.log(this.$refs);
-            this.$refs.loginFromRef.resetFields();
+            this.$refs.loginFromRef.resetFields()
         },
         login() {
-            this.$refs.loginFromRef.validate(async (valid) => {
-                if ( !valid ) return;
-                const { data : res } = await this.$http.post("login", this.loginFrom);
-                if ( res.meta.status !== 200 ) return this.$message.error("登录失败！");
-                this.$message.success("登录成功！");
+            this.$refs.loginFromRef.validate(async valid => {
+                if (!valid) return
+                const { data: res } = await this.$http.post(
+                    'login',
+                    this.loginFrom
+                )
+                if (res.meta.status !== 200)
+                    return this.$message.error('登录失败！')
+                this.$message.success('登录成功！')
                 // 登录成功之后的token，保存到客户端的sessionStorage中
                 //     项目中除了登录之外的其他api接口，都必须在登录之后才能访问
                 //     token只应在当前网站打开期间有效，所以将token存到sessionStorage中
-                window.sessionStorage.setItem("token",res.data.token);
+                window.sessionStorage.setItem('token', res.data.token)
                 // 通过编程式导航跳转到后台主页，路由地址是 /home
-                this.$router.push("/home");
-            }); 
+                this.$router.push('/home')
+            })
         }
     }
-};
+}
 </script>
 
 <style lang="less" scoped>
-
 .login_container {
     background-color: #2b4b6b;
     height: 100%;
