@@ -25,7 +25,7 @@
                 <el-table-column label="姓名" prop="username"></el-table-column>
                 <el-table-column label="邮箱" prop="email"></el-table-column>
                 <el-table-column label="电话" prop="mobile"></el-table-column>
-                <el-table-column label="角色" prop="role_name"></el-table-column>
+                <el-table-column label="角色"></el-table-column>
                 <el-table-column label="状态">
                     <template slot-scope="scope">
                         <el-switch v-model="scope.row.mg_state" @change="userStateChanged(scope.row)">
@@ -192,7 +192,8 @@ export default {
                         trigger: 'blur'
                     }
                 ]
-            }, // 添加用户表单的验证规则对象
+            }, 
+            // 修改用户表单的验证规则对象
             editFormRules: {
                 email: [
                     {

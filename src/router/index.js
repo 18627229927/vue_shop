@@ -4,6 +4,8 @@ import Login from '../components/Login.vue'
 import Home from '../components/Home.vue'
 import Welcome from '../components/Welcome.vue'
 import Users from '../components/User/Users.vue'
+import Rights from '../components/Power/Rights.vue'
+import Roles from '../components/Power/Roles.vue'
 import '../assets/css/global.css'
 import '../assets/fonts/iconfont.css'
 
@@ -45,6 +47,14 @@ const routes = [{
             path: '/users',
             name: 'users',
             component: Users,
+        }, {
+            path: '/rights',
+            name: 'rights',
+            component: Rights,
+        }, {
+            path: '/roles',
+            name: 'roles',
+            component: Roles,
         }]
     }
 ]
