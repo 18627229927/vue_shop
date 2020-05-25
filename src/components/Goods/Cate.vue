@@ -107,7 +107,7 @@ export default {
                 // 将要添加的分类名称
                 cat_name: '',
                 // 父级分类的ID
-                cat_id: 0,
+                cat_pid: 0,
                 // 分类的等级，默认添加的等级是1级分类
                 cat_level: 0
             },
@@ -179,25 +179,38 @@ export default {
         parentCateChange() {
             console.log(this.selectedKeys)
             if (this.selectedKeys.length > 0) {
-                this.addCateForm.cat_id = this.selectedKeys[
+                this.addCateForm.cat_pid = this.selectedKeys[
                     this.selectedKeys.length - 1
                 ]
                 this.addCateForm.cat_level = this.selectedKeys.length
                 return
             } else {
-                this.addCateForm.cat_id = 0
+                this.addCateForm.cat_pid = 0
                 this.addCateForm.cat_level = 0
             }
         },
         // 添加分类对话框确定按钮点击事件
         addCate() {
-            console.log(this.addCateForm)
+            this.$refs.addCateFormRef.validate(async valid => {
+                if (!valid) return
+                
+                const { data: res } = await this.$http.post(
+                    'categories',
+                    this.addCateForm
+                )
+                if (res.meta.status !== 201)
+                    return this.$message.error('添加分类失败！')
+                    console.log(res)
+                this.$message.success('添加分类成功！')
+                this.getCateList()
+                this.addCateDialogVisible = false
+            })
         },
         // 监听添加分类对话框关闭事件
         addCateDialogClose() {
             this.$refs.addCateFormRef.resetFields()
             this.selectedKeys = []
-            this.addCateForm.cat_id = 0
+            this.addCateForm.cat_pid = 0
             this.addCateForm.cat_level = 0
         }
     }

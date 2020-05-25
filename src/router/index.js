@@ -19,6 +19,9 @@ Vue.use(VueRouter)
 import axios from 'axios'
 // 配置请求的根路径
 axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/'
+// http://rambuild.cn:8888/api/private/v1
+
+
 // 拦截器
 axios.interceptors.request.use(confige => {
     confige.headers.Authorization = window.sessionStorage.getItem('token')
