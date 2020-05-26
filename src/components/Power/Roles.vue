@@ -227,7 +227,7 @@ export default {
                     }
                 )
                 if (res.meta.status !== 200)
-                    return this.$message.error('修改觉得信息失败！')
+                    return this.$message.error('修改角色信息失败！')
                 this.$message.success('修改角色信息成功！')
                 this.editDialogVisible = false
                 this.getRolesList()
