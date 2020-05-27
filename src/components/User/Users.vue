@@ -8,7 +8,7 @@
         </el-breadcrumb>
         <!-- 卡片视图区域 -->
         <el-card>
-            <!-- 收缩与添加区域 -->
+            <!-- 搜索与添加区域 -->
             <el-row :gutter="20">
                 <el-col :span="8">
                     <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="searchGetUserList">

@@ -8,6 +8,8 @@ import Rights from '../components/Power/Rights.vue'
 import Roles from '../components/Power/Roles.vue'
 import Cate from '../components/Goods/Cate.vue'
 import Params from '../components/Goods/Params.vue'
+import GoodsList from '../components/Goods/List.vue'
+import Add from '../components/Goods/Add.vue'
 import '../assets/css/global.css'
 import '../assets/fonts/iconfont.css'
 import treeTable from 'vue-table-with-tree-grid'
@@ -30,6 +32,20 @@ axios.interceptors.request.use(confige => {
     return confige
 })
 Vue.prototype.$http = axios
+
+// 全局时间过滤器
+Vue.filter('dataFormat', function(originVal) {
+    const dt = new Date(originVal*1000)
+    const y = dt.getFullYear()
+    const m = (dt.getMonth() + 1 + '').padStart(2, '0')
+    const d = (dt.getDate() + '').padStart(2, '0')
+
+    const hh = (dt.getHours() + '').padStart(2, '0')
+    const mm = (dt.getMinutes() + '').padStart(2, '0')
+    const ss = (dt.getSeconds() + '').padStart(2, '0')
+
+    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`
+})
 
 Vue.component('tree-table', treeTable)
 
@@ -71,6 +87,14 @@ const routes = [{
             path: '/params',
             name: 'params',
             component: Params,
+        }, {
+            path: '/goods',
+            name: 'list',
+            component: GoodsList,
+        }, {
+            path: '/goods/add',
+            name: 'add',
+            component: Add,
         }]
     }
 ]
