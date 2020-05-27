@@ -41,3 +41,7 @@ body,
 .el-step__title{
     font-size: 13px !important;
 }
+
+.el-steps--horizontal {
+    justify-content: center;
+}

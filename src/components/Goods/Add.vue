@@ -22,7 +22,7 @@
 
             <!-- tabs 栏区域 -->
             <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="100px" label-position="top">
-                <el-tabs v-model="activeIndex" :tab-position="'left'">
+                <el-tabs v-model="activeIndex" :tab-position="'left'" :before-leave="beforeTabLeave" @tab-click="tabClicked">
                     <el-tab-pane label="基本信息" name="0">
                         <el-form-item label="商品名称" prop="goods_name">
                             <el-input v-model="addForm.goods_name"></el-input>
@@ -37,7 +37,7 @@
                             <el-input v-model="addForm.goods_number" type="number"></el-input>
                         </el-form-item>
                         <el-form-item label="商品分类" prop="goods_cat">
-                            <el-cascader v-model="addForm.goods_cat" :options="cateList" :props="cateProps" @change="handleChange"></el-cascader>
+                            <el-cascader v-model="addForm.goods_cat" :options="cateList" :props="cateProps" @change="handleChange" clearable></el-cascader>
                         </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="商品参数" name="1">商品参数</el-tab-pane>
@@ -126,7 +126,20 @@ export default {
         },
         // 监听级联选择器选中项发生变化时触发
         handleChange() {
+            if(this.addForm.goods_cat.length !== 3) {
+                this.addForm.goods_cat = []
+            }
             console.log(this.addForm.goods_cat)
+        },
+        // 监听切换标签之前的钩子函数
+        beforeTabLeave(activeName, oldActiveName) {
+            if(oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
+                this.$message.error('请先选择商品分类')
+                return false
+            }
+        },
+        tabClicked() {
+            console.log(this.activeIndex)
         }
     }
 }
