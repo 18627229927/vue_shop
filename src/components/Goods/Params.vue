@@ -10,7 +10,7 @@
         <!-- 卡片视图区域 -->
         <el-card>
             <!-- 警告区域 -->
-            <el-alert title="注意：值允许第三级分类设置参数" type="warning" show-icon :closable="false">
+            <el-alert title="注意：只允许第三级分类设置参数" type="warning" show-icon :closable="false">
             </el-alert>
             <!-- 选择商品分类区域 -->
             <el-row class="cat_opt">
@@ -26,10 +26,19 @@
                 <!-- 添加动态参数的面板 -->
                 <el-tab-pane label="动态参数" name="many">
                     <el-button type="primary" size="mini" :disabled="isBtnDisabled" @click="showAddDialig">添加参数</el-button>
-                    <!-- 动态数据表格 -->
+                    <!-- 动态参数表格 -->
                     <el-table :data="manyTableData" border stripe>
                         <!-- 展开行 -->
-                        <el-table-column type="expand"></el-table-column>
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable @close="handleClose(i, scope.row)">{{item}}</el-tag>
+                                <!-- 文本框 -->
+                                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue" ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm(scope.row)" @blur="handleInputConfirm(scope.row)">
+                                </el-input>
+                                <!-- 添加tag按钮 -->
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
+                            </template>
+                        </el-table-column>
                         <!-- 索引列 -->
                         <el-table-column type="index" label="#"></el-table-column>
                         <el-table-column label="参数名称" prop="attr_name"></el-table-column>
@@ -48,7 +57,16 @@
                     <!-- 静态属性表格 -->
                     <el-table :data="onlyTableData" border stripe>
                         <!-- 展开行 -->
-                        <el-table-column type="expand"></el-table-column>
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable @close="handleClose(i, scope.row)">{{item}}</el-tag>
+                                <!-- 文本框 -->
+                                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue" ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm(scope.row)" @blur="handleInputConfirm(scope.row)">
+                                </el-input>
+                                <!-- 添加tag按钮 -->
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
+                            </template>
+                        </el-table-column>
                         <!-- 索引列 -->
                         <el-table-column type="index" label="#"></el-table-column>
                         <el-table-column label="属性名称" prop="attr_name"></el-table-column>
@@ -167,6 +185,8 @@ export default {
             // 证明选择的不是三级分类
             if (this.selectedCateKeys.length !== 3) {
                 this.selectedCateKeys = []
+                this.manyTableData = []
+                this.onlyTableData = []
                 return
             }
             // 根据所选分类的ID和当前所处的面板,获取对应的参数
@@ -178,7 +198,15 @@ export default {
             )
             if (res.meta.status !== 200)
                 return this.$message.error('获取参数列表失败!')
-            console.log(res)
+
+            res.data.forEach(item => {
+                // 默认展开行中文本框为隐藏
+                item.inputVisible = false
+                // 展开行中文本框的数据
+                item.inputValue = ''
+                item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+            })
+            console.log(res.data)
             if (this.activeName === 'many') {
                 this.manyTableData = res.data
             } else {
@@ -267,6 +295,45 @@ export default {
                 return this.$message.error('删除参数失败！')
             this.$message.success('删除参数成功！')
             this.getParamsData()
+        },
+        // 展开行中文本框失去焦点或按下Enter键触发
+        async handleInputConfirm(row) {
+            if (row.inputValue.trim().length === 0) {
+                row.inputValue = ''
+                row.inputVisible = false
+                return
+            }
+            row.attr_vals.push(row.inputValue.trim())
+            row.inputValue = ''
+            row.inputVisible = false
+            this.saveAttrVals(row)
+        },
+        // 将对attr_vals的操作保存到数据库
+        async saveAttrVals(row) {
+            const { data: res } = await this.$http.put(
+                `categories/${this.cateId}/attributes/${row.attr_id}`,
+                {
+                    attr_name: row.attr_name,
+                    attr_sel: row.attr_sel,
+                    attr_vals: row.attr_vals.join(',')
+                }
+            )
+            if (res.meta.status !== 200)
+                return this.$message.error('修改参数项失败！')
+            this.$message.success('修改参数项成功！')
+        },
+        // 点击添加tag按钮触发的事件
+        showInput(row) {
+            row.inputVisible = true
+            // 让文本框自动获取焦点
+            this.$nextTick(_ => {
+                this.$refs.saveTagInput.$refs.input.focus()
+            })
+        },
+        // 删除对应参数可选项
+        handleClose(i, row) {
+            row.attr_vals.splice(i, 1)
+            this.saveAttrVals(row)
         }
     },
     computed: {
@@ -302,5 +369,11 @@ export default {
 }
 .el-cascader {
     width: 50%;
+}
+.el-tag {
+    margin: 10px;
+}
+.input-new-tag {
+    width: 120px;
 }
 </style>
