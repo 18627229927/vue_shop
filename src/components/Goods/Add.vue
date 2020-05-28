@@ -40,17 +40,41 @@
                             <el-cascader v-model="addForm.goods_cat" :options="cateList" :props="cateProps" @change="handleChange" clearable></el-cascader>
                         </el-form-item>
                     </el-tab-pane>
-                    <el-tab-pane label="商品参数" name="1">商品参数</el-tab-pane>
-                    <el-tab-pane label="商品属性" name="2">商品属性</el-tab-pane>
-                    <el-tab-pane label="商品图片" name="3">商品图片</el-tab-pane>
-                    <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
+                    <el-tab-pane label="商品参数" name="1">
+                        <el-form-item :label="item.attr_name" v-for="item in manyTableData" :key="item.attr_id">
+                            <el-checkbox-group v-model="item.attr_vals">
+                                <el-checkbox :label="cb" v-for="(cb, i) in item.attr_vals" :key="i" border size="mini"></el-checkbox>
+                            </el-checkbox-group>
+                        </el-form-item>
+                    </el-tab-pane>
+                    <el-tab-pane label="商品属性" name="2">
+                        <el-form-item :label="item.attr_name" v-for="item in onlyTableData" :key="item.attr_id">
+                            <el-input v-model="item.attr_vals"></el-input>
+                        </el-form-item>
+                    </el-tab-pane>
+                    <el-tab-pane label="商品图片" name="3">
+                        <el-upload class="upload-demo" :action="uploadURL" :on-preview="handlePreview" :on-remove="handleRemove" list-type="picture" :headers="headerObj" :on-success="handleSuccess">
+                            <el-button size="small" type="primary">点击上传</el-button>
+                        </el-upload>
+                    </el-tab-pane>
+                    <el-tab-pane label="商品内容" name="4">
+                        <quill-editor v-model="addForm.goods_introduce"></quill-editor>
+                        <el-button type="primary" class="btnAdd" @click="add">添加商品</el-button>
+                    </el-tab-pane>
                 </el-tabs>
             </el-form>
         </el-card>
+
+        <!-- 图片预览 -->
+        <el-dialog title="图片预览" :visible.sync="previewVisible" width="30%">
+            <img :src="previewPath" alt="" class="previewImg">
+        </el-dialog>
     </div>
 </template>
 
 <script>
+import _ from 'lodash'
+
 export default {
     data() {
         return {
@@ -64,7 +88,12 @@ export default {
                 goods_weight: 0,
                 goods_number: 0,
                 // 商品所属的分类数组
-                goods_cat: []
+                goods_cat: [],
+                // 图片的数组
+                pics: [],
+                // 商品详情描述
+                goods_introduce: '',
+                attrs: []
             },
             // 添加商品的表单数据验证规则对象
             addFormRules: {
@@ -104,12 +133,25 @@ export default {
                     }
                 ]
             },
+            // 级联选择器的配置对象
             cateProps: {
                 expandTrigger: 'hover',
                 value: 'cat_id',
                 label: 'cat_name',
                 children: 'children'
-            }
+            },
+            // 商品动态参数列表
+            manyTableData: [],
+            // 静态属性参数列表
+            onlyTableData: [],
+            // 上传图片的后台API地址
+            uploadURL: 'http://timemeetyou.com:8889/api/private/v1/upload',
+            // 图片上传的请求头对象
+            headerObj: {
+                Authorization: window.sessionStorage.getItem('token')
+            },
+            previewPath: '',
+            previewVisible: false
         }
     },
     created() {
@@ -126,24 +168,123 @@ export default {
         },
         // 监听级联选择器选中项发生变化时触发
         handleChange() {
-            if(this.addForm.goods_cat.length !== 3) {
+            if (this.addForm.goods_cat.length !== 3) {
                 this.addForm.goods_cat = []
             }
             console.log(this.addForm.goods_cat)
         },
         // 监听切换标签之前的钩子函数
         beforeTabLeave(activeName, oldActiveName) {
-            if(oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
+            if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
                 this.$message.error('请先选择商品分类')
                 return false
             }
         },
-        tabClicked() {
+        async tabClicked() {
             console.log(this.activeIndex)
+            if (this.activeIndex === '1') {
+                const {
+                    data: res
+                } = await this.$http.get(
+                    `categories/${this.cateId}/attributes`,
+                    { params: { sel: 'many' } }
+                )
+                if (res.meta.status !== 200)
+                    return this.$message.error('获取动态参数列表失败')
+                res.data.forEach(item => {
+                    item.attr_vals =
+                        item.attr_vals === 0 ? [] : item.attr_vals.split(',')
+                })
+                this.manyTableData = res.data
+                console.log(this.manyTableData)
+            } else if (this.activeIndex === '2') {
+                const {
+                    data: res
+                } = await this.$http.get(
+                    `categories/${this.cateId}/attributes`,
+                    { params: { sel: 'only' } }
+                )
+                if (res.meta.status !== 200)
+                    return this.$message.error('获取静态属性列表失败')
+                this.onlyTableData = res.data
+            }
+        },
+        // 处理图片预览效果
+        handlePreview(file) {
+            this.previewPath = file.response.data.url
+            this.previewVisible = true
+        },
+        // 处理移除图片的操作
+        handleRemove(file) {
+            const filePath = file.response.data.tmp_path
+            const i = this.addForm.pics.findIndex(x => x.pic === filePath)
+            this.addForm.pics.splice(i, 1)
+            console.log(this.addForm)
+        },
+        // 监听图片上传成功的事件
+        handleSuccess(response) {
+            const picInfo = { pic: response.data.tmp_path }
+            this.addForm.pics.push(picInfo)
+            console.log(this.addForm)
+        },
+        add() {
+            this.$refs.addFormRef.validate(async valid => {
+                if (!valid) return this.$message.error('请填写必要的表单项！')
+                // 执行添加商品的业务逻辑
+                // lodash cloneDeep(Obj)
+                const form = _.cloneDeep(this.addForm)
+                // 或则通过JSON进行如下操作进行深拷贝
+                // const form = JSON.parse(JSON.stringify(this.addForm))
+                form.goods_cat = form.goods_cat.join(',')
+                // 处理动态参数
+                this.manyTableData.forEach(item => {
+                    const newInfo = {
+                        attr_id: item.attr_id,
+                        attr_value: item.attr_vals.join(',')
+                    }
+                    this.addForm.attrs.push(newInfo)
+                })
+                // 处理静态属性
+                this.onlyTableData.forEach(item => {
+                    const newInfo = {
+                        attr_id: item.attr_id,
+                        attr_value: item.attr_vals
+                    }
+                    this.addForm.attrs.push(newInfo)
+                })
+                form.attrs = this.addForm.attrs
+                console.log(form)
+                // 发起请求添加商品
+                const { data: res } = await this.$http.post('goods', form)
+                console.log(res)
+                // 老师的接口能添加图片，评论区的接口不能添加，所以判断400执行后续操作，
+                // 如果改用老师的接口能添加图片，判断改成201
+                if (res.meta.status !== 400)
+                    return this.$message.error('添加商品失败！')
+                this.$message.success('添加商品成功！')
+                this.$router.push('/goods')
+            })
+        }
+    },
+    computed: {
+        cateId() {
+            if (this.addForm.goods_cat.length === 3) {
+                return this.addForm.goods_cat[2]
+            }
+            return null
         }
     }
 }
 </script>
 
 <style lang="less" scoped>
+.el-checkbox {
+    margin: 10px !important;
+}
+.previewImg {
+    width: 100%;
+}
+.btnAdd {
+    margin-top: 15px;
+}
 </style>

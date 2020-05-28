@@ -10,19 +10,34 @@ import Cate from '../components/Goods/Cate.vue'
 import Params from '../components/Goods/Params.vue'
 import GoodsList from '../components/Goods/List.vue'
 import Add from '../components/Goods/Add.vue'
+// 全局样式
 import '../assets/css/global.css'
+// 字体图标
 import '../assets/fonts/iconfont.css'
+// 树形表格
 import treeTable from 'vue-table-with-tree-grid'
+// 富文本编辑器
+import VueQuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css' // import styles
+import 'quill/dist/quill.snow.css' // for snow theme
+import 'quill/dist/quill.bubble.css' // for bubble theme
 
 
 
 
 Vue.use(VueRouter)
+Vue.use(VueQuillEditor)
 
 import axios from 'axios'
 // 配置请求的根路径
 axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/'
-// http://rambuild.cn:8888/api/private/v1
+// 评论区大佬的接口地址
+// http://timemeetyou.com:8889/api/private/v1/
+// http://rambuild.cn:8888/api/private/v1/
+
+
+// 老师的接口地址
+// https://www.liulongbin.top:8888/api/private/v1/
 
 
 // 拦截器

@@ -45,3 +45,7 @@ body,
 .el-steps--horizontal {
     justify-content: center;
 }
+
+.ql-editor {
+    min-height: 300px;
+}
