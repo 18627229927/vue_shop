@@ -10,6 +10,7 @@ import Cate from '../components/Goods/Cate.vue'
 import Params from '../components/Goods/Params.vue'
 import GoodsList from '../components/Goods/List.vue'
 import Add from '../components/Goods/Add.vue'
+import Order from '../components/Order/Order.vue'
 // 全局样式
 import '../assets/css/global.css'
 // 字体图标
@@ -110,6 +111,10 @@ const routes = [{
             path: '/goods/add',
             name: 'add',
             component: Add,
+        }, {
+            path: '/orders',
+            name: 'order',
+            component: Order,
         }]
     }
 ]
