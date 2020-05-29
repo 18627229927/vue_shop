@@ -30,6 +30,10 @@ import 'quill/dist/quill.bubble.css' // for bubble theme
 Vue.use(VueRouter)
 Vue.use(VueQuillEditor)
 
+// 导入 NProgress 进度条包对应的js和css
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
 import axios from 'axios'
 // 配置请求的根路径
 axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/'
@@ -42,12 +46,20 @@ axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/'
 // https://www.liulongbin.top:8888/api/private/v1/
 
 
-// 拦截器
+// 拦截器   在request拦截器中展示进度条  NProgress.start()
 axios.interceptors.request.use(confige => {
+    NProgress.start()
     confige.headers.Authorization = window.sessionStorage.getItem('token')
     // 最后必须return confige
     return confige
 })
+// 在response拦截器中隐藏进度条  NProgress.done()
+axios.interceptors.response.use(confige => {
+    NProgress.done()
+    // 最后必须return confige
+    return confige
+})
+
 Vue.prototype.$http = axios
 
 // 全局时间过滤器
